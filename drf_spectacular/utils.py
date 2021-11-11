@@ -2,7 +2,7 @@ import inspect
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from rest_framework.fields import Field, empty
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import ListSerializer, Serializer
 from rest_framework.settings import api_settings
 
 from drf_spectacular.drainage import (
@@ -10,9 +10,11 @@ from drf_spectacular.drainage import (
 )
 from drf_spectacular.types import OpenApiTypes, _KnownPythonTypes
 
+_ListSerializerType = Union[ListSerializer, Type[ListSerializer]]
 _SerializerType = Union[Serializer, Type[Serializer]]
 _FieldType = Union[Field, Type[Field]]
 _ParameterLocationType = Literal['query', 'path', 'header', 'cookie']
+_SchemaType = Dict[str, Any]
 Direction = Literal['request', 'response']
 
 
