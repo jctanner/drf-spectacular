@@ -155,7 +155,7 @@ class SchemaGenerator(BaseSchemaGenerator):
         action_schema = getattr(action, 'kwargs', {}).get('schema', None)
         if not action_schema:
             # there is no method/action customized schema so we are done here.
-            do_log(f'spectacular - create_view - not action_schema')
+            do_log(f'spectacular - create_view - not action_schema:{action_schema}')
             return view
 
         # action_schema is either a class or instance. when @extend_schema is used, it
