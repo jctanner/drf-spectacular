@@ -18,6 +18,12 @@ from drf_spectacular.plumbing import (
 from drf_spectacular.settings import spectacular_settings
 
 
+def do_log(msg):
+    print(msg)
+    with open('/tmp/debug.log', 'a') as f:
+        f.write(msg + '\n')
+
+
 class EndpointEnumerator(BaseEndpointEnumerator):
     def get_api_endpoints(self, patterns=None, prefix=''):
         api_endpoints = self._get_api_endpoints(patterns, prefix)
@@ -110,18 +116,17 @@ class SchemaGenerator(BaseSchemaGenerator):
         Therefore forcefully set the schema if @extend_schema decorator was used.
         """
 
-        msg = f'spectacular - create_view - callback:{callback} method:{method} request;{request}'
-        print(msg)
-        with open('/tmp/debug.log', 'a') as f:
-            f.write(msg + '\n')
+        do_log(f'spectacular - create_view - callback:{callback} method:{method} request;{request}')
 
         override_view = OpenApiViewExtension.get_match(callback.cls)
         if override_view:
             original_cls = callback.cls
             callback.cls = override_view.view_replacement()
+            do_log(f'spectacular - create_view - override_view:{override_view}')
 
         # we refrain from passing request and deal with it ourselves in parse()
         view = super().create_view(callback, method, None)
+        do_log(f'spectacular - create_view - view:{view}')
 
         # drf-yasg compatibility feature. makes the view aware that we are running
         # schema generation and not a real request.
@@ -133,19 +138,23 @@ class SchemaGenerator(BaseSchemaGenerator):
             callback.cls = original_cls
 
         if isinstance(view, viewsets.ViewSetMixin):
+            do_log(f'spectacular - create_view - isinstance viewsets.ViewSetMixin')
             action = getattr(view, view.action)
         elif isinstance(view, views.APIView):
+            do_log(f'spectacular - create_view - isinstance views.APIView')
             action = getattr(view, method.lower())
         else:
             error(
                 'Using not supported View class. Class must be derived from APIView '
                 'or any of its subclasses like GenericApiView, GenericViewSet.'
             )
+            do_log(f'spectacular - create_view - error: {error}')
             return view
 
         action_schema = getattr(action, 'kwargs', {}).get('schema', None)
         if not action_schema:
             # there is no method/action customized schema so we are done here.
+            do_log(f'spectacular - create_view - not action_schema')
             return view
 
         # action_schema is either a class or instance. when @extend_schema is used, it
@@ -169,6 +178,8 @@ class SchemaGenerator(BaseSchemaGenerator):
             action_schema_class = type('ExtendedRearrangedSchema', mro, {})
 
         view.schema = action_schema_class()
+        do_log(f'spectacular - create_view - view.schema: {view.schema}')
+        do_log(f'spectacular - create_view - returning view: {view}')
         return view
 
     def _initialise_endpoints(self):
