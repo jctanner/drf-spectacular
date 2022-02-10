@@ -109,6 +109,12 @@ class SchemaGenerator(BaseSchemaGenerator):
         decorating plain views like retrieve, this initialization logic is not running.
         Therefore forcefully set the schema if @extend_schema decorator was used.
         """
+
+        msg = f'spectacular - create_view - callback:{callback} method:{method} request;{request}'
+        print(msg)
+        with open('/tmp/debug.log', 'a') as f:
+            f.write(msg + '\n')
+
         override_view = OpenApiViewExtension.get_match(callback.cls)
         if override_view:
             original_cls = callback.cls
